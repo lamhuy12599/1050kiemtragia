@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1167 Trương Định, Checker</title>
+    
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/1280px-7-eleven_logo.svg.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <style>
+        /* CSS Reset & Font */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        
+        /* BIẾN MÀU SẮC */
+        :root {
+            --7e-green: #008062;
+            --7e-orange: #F37021;
+            --7e-red: #E2231A;
+            --bg-main: #F4F5F7;
+            --bg-card: #ffffff;
+            --text-main: #333;
+            --text-muted: #666;
+            --border-color: #eee;
+            --input-bg: #fff;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #f1f1f1;
+            --text-muted: #aaa;
+            --border-color: #333;
+            --input-bg: #2c2c2c;
+        }
+
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; padding: 20px 10px; transition: 0.3s; }
+        
+        .app-container { width: 100%; max-width: 480px; background: var(--bg-card); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); overflow: hidden; transition: 0.3s; }
+
+        /* Header có chứa Logo */
+        .app-header { background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; padding: 15px 15px; border-bottom: 1px solid var(--border-color); position: relative; }
+        .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(to right, var(--7e-green) 33%, var(--7e-red) 33%, var(--7e-red) 66%, var(--7e-orange) 66%); }
+        
+        /* Căn chỉnh Logo và Tiêu đề nằm ngang */
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .app-logo { height: 32px; width: auto; object-fit: contain; }
+        .app-header h2 { color: var(--7e-green); font-size: 19px; font-weight: 800; }
+        
+        .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 5px; border-radius: 50%; }
+
+        .app-body { padding: 20px; }
+        .status-bar { text-align: center; font-size: 13px; font-weight: 600; padding: 8px; border-radius: 6px; margin-bottom: 20px; background: #e8f5e9; color: var(--7e-green); }
+
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 15px; background: var(--input-bg); color: var(--text-main); transition: 0.3s; }
+        input:focus { border-color: var(--7e-green); outline: none; }
+
+        .btn { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 8px; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-scan { background-color: var(--7e-orange); }
+        .btn-scan:hover { background-color: #d6611a; }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-search { background-color: var(--7e-green); flex: 2; }
+        .btn-clear { background-color: #757575; flex: 1; }
+
+        #reader { width: 100%; border-radius: 8px; overflow: hidden; margin-top: 10px; }
+
+        .result-box { margin-top: 25px; padding: 20px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-color); display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; border-bottom: 1px dotted var(--border-color); padding-bottom: 8px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-muted); font-weight: 500; }
+        .info-value { font-weight: 700; color: var(--text-main); text-align: right; max-width: 65%; }
+        .text-green { color: var(--7e-green); }
+        
+        .barcode-container { background: white; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; border: 2px solid #eee; }
+        #barcodeImage { max-width: 100%; height: auto; }
+
+        .history-section { margin-top: 30px; border-top: 2px dashed var(--border-color); padding-top: 15px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .history-header h3 { font-size: 15px; color: var(--text-muted); text-transform: uppercase; }
+        .btn-clear-history { background: none; border: none; color: var(--7e-red); font-size: 13px; cursor: pointer; font-weight: bold; }
+        .history-list { list-style: none; max-height: 150px; overflow-y: auto; }
+        .history-item { background: var(--input-bg); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+        .history-item:hover { border-color: var(--7e-green); }
+        .hist-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
+        .hist-barcode { font-size: 12px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="app-header">
+        <div class="header-left">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/7-eleven_logo.svg" alt="7-Eleven Logo" class="app-logo">
+            <h2>1167 Trương Định</h2>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" id="themeIcon">🌙</button>
+    </div>
+
+    <div class="app-body">
+        <div id="loadingStatus" class="status-bar">🔄 Đang đồng bộ máy chủ...</div>
+
+        <div class="form-group">
+            <label>Mã Vạch Sản Phẩm</label>
+            <input type="text" id="barcodeInput" placeholder="Nhập mã hoặc quét camera...">
+            <button class="btn btn-scan" onclick="startScan()">📷 BẬT MÁY QUÉT</button>
+            <div id="reader"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Tên Sản Phẩm</label>
+            <input list="productDataList" id="nameInput" placeholder="Nhập tên sản phẩm để tìm...">
+            <datalist id="productDataList"></datalist>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-search" onclick="searchProduct()">🔍 TRA CỨU</button>
+            <button class="btn btn-clear" onclick="clearData()">❌ XÓA</button>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <div class="info-row">
+                <span class="info-label">Mã nội bộ:</span>
+                <span class="info-value text-green" id="resProductId">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tên SP:</span>
+                <span class="info-value" id="resName">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Đổi trả:</span>
+                <span class="info-value" style="color:#d32f2f;" id="resReturn">-</span> 
+            </div>
+            <div class="info-row">
+                <span class="info-label">Group:</span>
+                <span class="info-value" id="resGroup">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Category:</span>
+                <span class="info-value" id="resCat">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Sub-Category:</span>
+                <span class="info-value" id="resSubCat">-</span>
+            </div>
+            <div class="barcode-container">
+                <svg id="barcodeImage"></svg>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <h3>Lịch sử tra cứu</h3>
+                <button class="btn-clear-history" onclick="clearHistory()">Xóa lịch sử</button>
+            </div>
+            <ul class="history-list" id="historyList"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Link Google Sheet API do bạn cung cấp
+    const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbzHLBMpw2MhG8YmTWI1BWVWU6snXMuVE3QdTV64kDtcqOpm78EofL0kscSJ_XxssCAN/exec"; 
+    
+    let products = []; 
+    let html5QrCode; 
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('appTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeIcon').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+    
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('appTheme', newTheme);
+        document.getElementById('themeIcon').innerText = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    function saveToHistory(product) {
+        let history = JSON.parse(localStorage.getItem('scanHistory')) || [];
+        history = history.filter(item => item.Barcode !== product.Barcode);
+        history.unshift({ ProductName: product.ProductName, Barcode: product.Barcode });
+        if (history.length > 10) history.pop(); 
+        localStorage.setItem('scanHistory', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem('scanHistory')) || [];
+        const listEl = document.getElementById('historyList');
+        listEl.innerHTML = "";
+        
+        if (history.length === 0) {
+            listEl.innerHTML = "<li style='text-align:center; color:#aaa; font-size:13px;'>Chưa có dữ liệu</li>";
+            return;
+        }
+
+        history.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            li.innerHTML = `<span class="hist-name">${item.ProductName}</span> <span class="hist-barcode">#${item.Barcode}</span>`;
+            li.onclick = () => {
+                document.getElementById('barcodeInput').value = item.Barcode;
+                document.getElementById('nameInput').value = "";
+                searchProduct();
+            };
+            listEl.appendChild(li);
+        });
+    }
+
+    function clearHistory() {
+        localStorage.removeItem('scanHistory');
+        renderHistory();
+    }
+
+    function clearData() {
+        document.getElementById('barcodeInput').value = "";
+        document.getElementById('nameInput').value = "";
+        document.getElementById('resultBox').style.display = "none";
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => { document.getElementById('reader').innerHTML = ""; });
+        }
+    }
+
+    async function loadDatabaseFromSheet() {
+        const statusDiv = document.getElementById('loadingStatus');
+        try {
+            const response = await fetch(GOOGLE_SHEET_API);
+            products = await response.json();
+            
+            const datalist = document.getElementById('productDataList');
+            datalist.innerHTML = ""; 
+            products.forEach(p => {
+                let option = document.createElement('option');
+                option.value = p.ProductName;
+                datalist.appendChild(option);
+            });
+            
+            statusDiv.style.background = "#e8f5e9";
+            statusDiv.style.color = "var(--7e-green)";
+            statusDiv.innerText = "✅ Kết nối Database thành công!";
+            setTimeout(() => { statusDiv.style.display = "none"; }, 3000); 
+        } catch (error) {
+            statusDiv.style.background = "#ffebee";
+            statusDiv.style.color = "var(--7e-red)";
+            statusDiv.innerText = "❌ Lỗi kết nối máy chủ!";
+        }
+    }
+
+    window.onload = () => {
+        initTheme();
+        renderHistory();
+        loadDatabaseFromSheet();
+    };
+
+    function searchProduct() {
+        const barcodeVal = document.getElementById('barcodeInput').value.trim();
+        const nameVal = document.getElementById('nameInput').value.trim();
+        let foundProduct = null;
+
+        if (barcodeVal) {
+            foundProduct = products.find(p => String(p.Barcode) === barcodeVal);
+        } else if (nameVal) {
+            foundProduct = products.find(p => p.ProductName.toLowerCase() === nameVal.toLowerCase());
+        }
+
+        if (foundProduct) {
+            document.getElementById('resProductId').innerText = foundProduct.ProductID || "-";
+            document.getElementById('resName').innerText = foundProduct.ProductName;
+            document.getElementById('resReturn').innerText = (foundProduct.ReturnPolicy && foundProduct.ReturnPolicy.trim() !== "") ? foundProduct.ReturnPolicy : "-";
+            
+            // Map dữ liệu ngành hàng
+            document.getElementById('resGroup').innerText = foundProduct.Group || "-";
+            document.getElementById('resCat').innerText = foundProduct.Category || "-";
+            document.getElementById('resSubCat').innerText = foundProduct.Subcategory || "-";
+            
+            document.getElementById('barcodeInput').value = foundProduct.Barcode;
+
+            JsBarcode("#barcodeImage", String(foundProduct.Barcode), {
+                format: "CODE128",
+                lineColor: "#000",
+                width: 2.2,
+                height: 55,
+                displayValue: true,
+                fontSize: 16
+            });
+
+            document.getElementById('resultBox').style.display = "block";
+            saveToHistory(foundProduct);
+        } else {
+            alert("Không tìm thấy dữ liệu sản phẩm!");
+            document.getElementById('resultBox').style.display = "none";
+        }
+    }
+
+    function startScan() {
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 15, qrbox: { width: 280, height: 100 } };
+
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config,
+            (decodedText) => {
+                document.getElementById('barcodeInput').value = decodedText;
+                html5QrCode.stop().then(() => {
+                    document.getElementById('reader').innerHTML = ""; 
+                    searchProduct(); 
+                });
+            },
+            (errorMessage) => { }
+        ).catch(err => {
+            alert("Vui lòng cấp quyền Camera và sử dụng link HTTPS!");
+        });
+    }
+</script>
+</body>
+</html>
