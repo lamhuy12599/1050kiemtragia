@@ -14,81 +14,215 @@
         /* CSS Reset & Font */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         
-        /* BIẾN MÀU SẮC */
+        /* BIẾN MÀU SẮC LIQUID GLASS & 7-ELEVEN */
         :root {
             --7e-green: #008062;
             --7e-orange: #F37021;
             --7e-red: #E2231A;
-            --bg-main: #F4F5F7;
-            --bg-card: #ffffff;
-            --text-main: #333;
-            --text-muted: #666;
-            --border-color: #eee;
-            --input-bg: #fff;
+            --7e-dark: #1a202c;
+            
+            /* Cấu hình nâng cao cho Liquid Glass */
+            --glass-bg: rgba(255, 255, 255, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-highlight: rgba(255, 255, 255, 0.6);
+            --liquid-shadow: rgba(31, 38, 135, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.45);
+            --card-inner: rgba(255, 255, 255, 0.25);
+            --text-main: #1a202c;
+            --text-muted: #4a5568;
+            --border-color: rgba(255, 255, 255, 0.4);
         }
 
         [data-theme="dark"] {
-            --bg-main: #121212;
-            --bg-card: #1e1e1e;
+            --glass-bg: rgba(26, 32, 44, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.1);
+            --liquid-shadow: rgba(0, 0, 0, 0.3);
+            --input-bg: rgba(0, 0, 0, 0.25);
+            --card-inner: rgba(0, 0, 0, 0.15);
             --text-main: #f1f1f1;
-            --text-muted: #aaa;
-            --border-color: #333;
-            --input-bg: #2c2c2c;
+            --text-muted: #a0aec0;
+            --border-color: rgba(255, 255, 255, 0.1);
         }
 
-        body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; padding: 20px 10px; transition: 0.3s; }
+        body { 
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(0, 128, 98, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(243, 112, 33, 0.06) 0%, transparent 40%),
+                linear-gradient(135deg, #eef2f7 0%, #dfe7f0 100%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 12px; 
+            transition: background 0.3s ease; 
+        }
         
-        .app-container { width: 100%; max-width: 480px; background: var(--bg-card); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); overflow: hidden; transition: 0.3s; }
+        /* Container dạng giọt thủy tinh dày dày bo góc lớn */
+        .app-container { 
+            width: 100%; 
+            max-width: 480px; 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 28px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 8px 32px 0 var(--liquid-shadow),
+                inset 0 2px 4px 0 var(--glass-highlight),
+                inset 0 -2px 4px 0 rgba(0, 0, 0, 0.02);
+            overflow: hidden; 
+            transition: all 0.3s ease; 
+        }
 
-        /* Header có chứa Logo */
-        .app-header { background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; padding: 15px 15px; border-bottom: 1px solid var(--border-color); position: relative; }
-        .app-header::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(to right, var(--7e-green) 33%, var(--7e-red) 33%, var(--7e-red) 66%, var(--7e-orange) 66%); }
+        /* Header trong suốt có dải màu 7-Eleven chảy phía trên */
+        .app-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px 20px 15px 20px; 
+            border-bottom: 1px solid var(--border-color); 
+            position: relative; 
+        }
+        .app-header::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 5px; 
+            background: linear-gradient(to right, var(--7e-green) 33%, var(--7e-red) 33%, var(--7e-red) 66%, var(--7e-orange) 66%); 
+        }
         
-        /* Căn chỉnh Logo và Tiêu đề nằm ngang */
-        .header-left { display: flex; align-items: center; gap: 10px; }
-        .app-logo { height: 32px; width: auto; object-fit: contain; }
-        .app-header h2 { color: var(--7e-green); font-size: 19px; font-weight: 800; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .app-logo { height: 34px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+        .app-header h2 { color: var(--7e-green); font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
         
-        .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 5px; border-radius: 50%; }
+        .theme-btn { background: rgba(255,255,255,0.4); border: 1px solid var(--border-color); font-size: 18px; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s; }
+        .theme-btn:hover { transform: scale(1.05); background: rgba(255,255,255,0.6); }
 
-        .app-body { padding: 20px; }
-        .status-bar { text-align: center; font-size: 13px; font-weight: 600; padding: 8px; border-radius: 6px; margin-bottom: 20px; background: #e8f5e9; color: var(--7e-green); }
-
-        .form-group { margin-bottom: 15px; }
-        label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 15px; background: var(--input-bg); color: var(--text-main); transition: 0.3s; }
-        input:focus { border-color: var(--7e-green); outline: none; }
-
-        .btn { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 8px; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
-        .btn-scan { background-color: var(--7e-orange); }
-        .btn-scan:hover { background-color: #d6611a; }
+        .app-body { padding: 24px; }
         
-        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-search { background-color: var(--7e-green); flex: 2; }
-        .btn-clear { background-color: #757575; flex: 1; }
+        /* Thanh trạng thái hiệu ứng mờ mịn */
+        .status-bar { 
+            text-align: center; 
+            font-size: 13px; 
+            font-weight: 700; 
+            padding: 10px; 
+            border-radius: 12px; 
+            margin-bottom: 22px; 
+            background: rgba(232, 245, 233, 0.6); 
+            color: var(--7e-green); 
+            border: 1px solid rgba(0, 128, 98, 0.15);
+            backdrop-filter: blur(5px);
+        }
 
-        #reader { width: 100%; border-radius: 8px; overflow: hidden; margin-top: 10px; }
+        .form-group { margin-bottom: 18px; }
+        label { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
+        
+        /* Input gương bóng */
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 14px; 
+            font-size: 15px; 
+            font-weight: 600;
+            background: var(--input-bg); 
+            color: var(--text-main); 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.3s ease; 
+            outline: none;
+        }
+        input:focus { 
+            border-color: var(--7e-green); 
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 0 0 4px rgba(0, 128, 98, 0.12), inset 0 2px 4px rgba(0,0,0,0.01); 
+        }
 
-        .result-box { margin-top: 25px; padding: 20px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-color); display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; border-bottom: 1px dotted var(--border-color); padding-bottom: 8px; }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { color: var(--text-muted); font-weight: 500; }
+        /* Nút bấm hiệu ứng Gel lỏng tròn trịa */
+        .btn { 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 15px; 
+            font-weight: 700; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 14px; 
+            cursor: pointer; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            margin-top: 10px; 
+            box-shadow: 0 6px 16px rgba(0,0,0,0.05), inset 0 3px 5px rgba(255,255,255,0.3);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+        }
+        .btn:active { transform: scale(0.97); }
+        
+        .btn-scan { 
+            background: linear-gradient(135deg, #ff843d 0%, var(--7e-orange) 50%, #df570b 100%); 
+            box-shadow: 0 6px 16px rgba(243, 112, 33, 0.25), inset 0 3px 5px rgba(255,255,255,0.3);
+        }
+        .btn-scan:hover { filter: brightness(1.05); transform: translateY(-1px); }
+        
+        .action-buttons { display: flex; gap: 12px; margin-top: 18px; }
+        .btn-search { 
+            background: linear-gradient(135deg, #00a37d 0%, var(--7e-green) 50%, #00664e 100%); 
+            flex: 2; 
+            box-shadow: 0 6px 16px rgba(0, 128, 98, 0.25), inset 0 3px 5px rgba(255,255,255,0.3);
+        }
+        .btn-search:hover { filter: brightness(1.05); transform: translateY(-1px); }
+        
+        .btn-clear { background-color: #6b7280; flex: 1; border: none; box-shadow: none; }
+        .btn-clear:hover { background-color: #4b5563; }
+
+        #reader { width: 100%; border-radius: 14px; overflow: hidden; margin-top: 12px; border: 1px solid var(--border-color); }
+
+        /* Kết quả hiển thị dạng hộp kính lơ lửng */
+        .result-box { 
+            margin-top: 25px; 
+            padding: 22px; 
+            border-radius: 18px; 
+            background: var(--card-inner); 
+            border: 1px solid var(--border-color); 
+            display: none; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03); 
+        }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 15px; border-bottom: 1px dotted var(--border-color); padding-bottom: 10px; align-items: center; }
+        .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .info-label { color: var(--text-muted); font-weight: 600; font-size: 13px; text-transform: uppercase; }
         .info-value { font-weight: 700; color: var(--text-main); text-align: right; max-width: 65%; }
-        .text-green { color: var(--7e-green); }
+        .text-green { color: var(--7e-green); font-size: 16px; }
         
-        .barcode-container { background: white; padding: 10px; border-radius: 8px; text-align: center; margin-top: 15px; border: 2px solid #eee; }
-        #barcodeImage { max-width: 100%; height: auto; }
+        .barcode-container { background: rgba(255, 255, 255, 0.9); padding: 12px; border-radius: 12px; text-align: center; margin-top: 18px; border: 1px solid rgba(0,0,0,0.05); }
+        #barcodeImage { max-width: 100%; height: auto; display: inline-block; }
 
-        .history-section { margin-top: 30px; border-top: 2px dashed var(--border-color); padding-top: 15px; }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .history-header h3 { font-size: 15px; color: var(--text-muted); text-transform: uppercase; }
-        .btn-clear-history { background: none; border: none; color: var(--7e-red); font-size: 13px; cursor: pointer; font-weight: bold; }
-        .history-list { list-style: none; max-height: 150px; overflow-y: auto; }
-        .history-item { background: var(--input-bg); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s; }
-        .history-item:hover { border-color: var(--7e-green); }
-        .hist-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
-        .hist-barcode { font-size: 12px; color: var(--text-muted); }
+        /* Lịch sử tra cứu */
+        .history-section { margin-top: 30px; border-top: 1px dashed var(--border-color); padding-top: 20px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .history-header h3 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-clear-history { background: none; border: none; color: var(--7e-red); font-size: 13px; cursor: pointer; font-weight: 700; }
+        .btn-clear-history:hover { text-decoration: underline; }
+        
+        .history-list { list-style: none; max-height: 160px; overflow-y: auto; }
+        .history-item { 
+            background: var(--card-inner); 
+            border: 1px solid var(--border-color); 
+            margin-bottom: 8px; 
+            padding: 12px 15px; 
+            border-radius: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+        }
+        .history-item:hover { border-color: var(--7e-green); background: rgba(255,255,255,0.5); transform: translateX(2px); }
+        .hist-name { font-weight: 700; font-size: 14px; color: var(--text-main); }
+        .hist-barcode { font-size: 12px; color: var(--text-muted); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -134,7 +268,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Đổi trả:</span>
-                <span class="info-value" style="color:#d32f2f;" id="resReturn">-</span> 
+                <span class="info-value" style="color:#e2231a;" id="resReturn">-</span> 
             </div>
             <div class="info-row">
                 <span class="info-label">Group:</span>
@@ -164,11 +298,19 @@
 </div>
 
 <script>
-    // Link Google Sheet API do bạn cung cấp
-    const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyKbEKNSqlKTeH7Hfe9puH1XsSgfpC3_5IJiG2hBE3gUZTX5prW3vvKMoiagxgzyOVq/exec"; 
+    const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbzZKE1WtzqEvZuyZe97JHuyGoIxyalVjAPAwMrV_iEoRJLmLMXKJ2LOo3nUS2LbVF2_/exec"; 
     
     let products = []; 
     let html5QrCode; 
+    
+    // Khởi tạo các biến lưu tên cột thực tế từ API chống lỗi undefined
+    let KEY_NAME = "ProductName";
+    let KEY_BARCODE = "Barcode";
+    let KEY_ID = "ProductID";
+    let KEY_RETURN = "ReturnPolicy";
+    let KEY_GROUP = "Group";
+    let KEY_CAT = "Category";
+    let KEY_SUBCAT = "Subcategory";
 
     function initTheme() {
         const savedTheme = localStorage.getItem('appTheme') || 'light';
@@ -186,8 +328,11 @@
 
     function saveToHistory(product) {
         let history = JSON.parse(localStorage.getItem('scanHistory')) || [];
-        history = history.filter(item => item.Barcode !== product.Barcode);
-        history.unshift({ ProductName: product.ProductName, Barcode: product.Barcode });
+        const pBarcode = product[KEY_BARCODE] || "";
+        const pName = product[KEY_NAME] || "";
+        
+        history = history.filter(item => item.Barcode !== pBarcode);
+        history.unshift({ ProductName: pName, Barcode: pBarcode });
         if (history.length > 10) history.pop(); 
         localStorage.setItem('scanHistory', JSON.stringify(history));
         renderHistory();
@@ -199,7 +344,7 @@
         listEl.innerHTML = "";
         
         if (history.length === 0) {
-            listEl.innerHTML = "<li style='text-align:center; color:#aaa; font-size:13px;'>Chưa có dữ liệu</li>";
+            listEl.innerHTML = "<li style='text-align:center; color:#aaa; font-size:13px; padding:10px;'>Chưa có dữ liệu</li>";
             return;
         }
 
@@ -230,26 +375,61 @@
         }
     }
 
+    // Hàm tự động quét và chuẩn hóa Key trường dữ liệu từ Google Sheet API
+    function autoDetectKeys(firstRow) {
+        if (!firstRow) return;
+        const keys = Object.keys(firstRow);
+        
+        // Quét tìm Key Tên sản phẩm
+        const nameMatch = keys.find(k => ["productname", "tenmon", "tensanpham", "tên sản phẩm", "tensp", "name"].includes(k.toLowerCase().trim()));
+        if (nameMatch) KEY_NAME = nameMatch;
+
+        // Quét tìm Key Barcode
+        const barcodeMatch = keys.find(k => ["barcode", "mạch", "mã vạch", "mavach"].includes(k.toLowerCase().trim()));
+        if (barcodeMatch) KEY_BARCODE = barcodeMatch;
+
+        // Quét tìm Key ID sản phẩm
+        const idMatch = keys.find(k => ["productid", "manoibo", "mã nội bộ", "id"].includes(k.toLowerCase().trim()));
+        if (idMatch) KEY_ID = idMatch;
+
+        // Quét tìm Key chính sách đổi trả
+        const returnMatch = keys.find(k => ["returnpolicy", "doitra", "đổi trả", "chinhsach"].includes(k.toLowerCase().trim()));
+        if (returnMatch) KEY_RETURN = returnMatch;
+
+        // Quét các Key ngành hàng
+        const groupMatch = keys.find(k => k.toLowerCase().trim() === "group"); if (groupMatch) KEY_GROUP = groupMatch;
+        const catMatch = keys.find(k => k.toLowerCase().trim() === "category"); if (catMatch) KEY_CAT = catMatch;
+        const subcatMatch = keys.find(k => k.toLowerCase().trim() === "subcategory"); if (subcatMatch) KEY_SUBCAT = subcatMatch;
+    }
+
     async function loadDatabaseFromSheet() {
         const statusDiv = document.getElementById('loadingStatus');
         try {
             const response = await fetch(GOOGLE_SHEET_API);
             products = await response.json();
             
+            if (products.length > 0) {
+                // Kích hoạt nhận diện tự động cấu trúc tiêu đề
+                autoDetectKeys(products[0]);
+            }
+            
             const datalist = document.getElementById('productDataList');
             datalist.innerHTML = ""; 
             products.forEach(p => {
-                let option = document.createElement('option');
-                option.value = p.ProductName;
-                datalist.appendChild(option);
+                if (p[KEY_NAME]) { // Đảm bảo không nạp dữ liệu rỗng hoặc undefined
+                    let option = document.createElement('option');
+                    option.value = p[KEY_NAME];
+                    datalist.appendChild(option);
+                }
             });
             
-            statusDiv.style.background = "#e8f5e9";
+            statusDiv.style.background = "rgba(232, 245, 233, 0.8)";
             statusDiv.style.color = "var(--7e-green)";
             statusDiv.innerText = "✅ Kết nối Database thành công!";
             setTimeout(() => { statusDiv.style.display = "none"; }, 3000); 
         } catch (error) {
-            statusDiv.style.background = "#ffebee";
+            console.error(error);
+            statusDiv.style.background = "rgba(255, 235, 235, 0.8)";
             statusDiv.style.color = "var(--7e-red)";
             statusDiv.innerText = "❌ Lỗi kết nối máy chủ!";
         }
@@ -267,31 +447,35 @@
         let foundProduct = null;
 
         if (barcodeVal) {
-            foundProduct = products.find(p => String(p.Barcode) === barcodeVal);
+            foundProduct = products.find(p => p[KEY_BARCODE] && String(p[KEY_BARCODE]).trim() === barcodeVal);
         } else if (nameVal) {
-            foundProduct = products.find(p => p.ProductName.toLowerCase() === nameVal.toLowerCase());
+            foundProduct = products.find(p => p[KEY_NAME] && p[KEY_NAME].toString().toLowerCase().trim() === nameVal.toLowerCase());
         }
 
         if (foundProduct) {
-            document.getElementById('resProductId').innerText = foundProduct.ProductID || "-";
-            document.getElementById('resName').innerText = foundProduct.ProductName;
-            document.getElementById('resReturn').innerText = (foundProduct.ReturnPolicy && foundProduct.ReturnPolicy.trim() !== "") ? foundProduct.ReturnPolicy : "-";
+            document.getElementById('resProductId').innerText = foundProduct[KEY_ID] || "-";
+            document.getElementById('resName').innerText = foundProduct[KEY_NAME] || "-";
             
-            // Map dữ liệu ngành hàng
-            document.getElementById('resGroup').innerText = foundProduct.Group || "-";
-            document.getElementById('resCat').innerText = foundProduct.Category || "-";
-            document.getElementById('resSubCat').innerText = foundProduct.Subcategory || "-";
+            const rPolicy = foundProduct[KEY_RETURN];
+            document.getElementById('resReturn').innerText = (rPolicy && rPolicy.toString().trim() !== "") ? rPolicy : "-";
             
-            document.getElementById('barcodeInput').value = foundProduct.Barcode;
+            document.getElementById('resGroup').innerText = foundProduct[KEY_GROUP] || "-";
+            document.getElementById('resCat').innerText = foundProduct[KEY_CAT] || "-";
+            document.getElementById('resSubCat').innerText = foundProduct[KEY_SUBCAT] || "-";
+            
+            const finalBarcode = foundProduct[KEY_BARCODE] ? String(foundProduct[KEY_BARCODE]).trim() : "";
+            document.getElementById('barcodeInput').value = finalBarcode;
 
-            JsBarcode("#barcodeImage", String(foundProduct.Barcode), {
-                format: "CODE128",
-                lineColor: "#000",
-                width: 2.2,
-                height: 55,
-                displayValue: true,
-                fontSize: 16
-            });
+            if (finalBarcode) {
+                JsBarcode("#barcodeImage", finalBarcode, {
+                    format: "CODE128",
+                    lineColor: "#000",
+                    width: 2.0,
+                    height: 50,
+                    displayValue: true,
+                    fontSize: 15
+                });
+            }
 
             document.getElementById('resultBox').style.display = "block";
             saveToHistory(foundProduct);
