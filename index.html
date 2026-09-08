@@ -9,6 +9,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
         /* --- iOS SF Pro Font & Base Reset --- */
@@ -120,6 +121,7 @@
             transition: transform 0.2s;
         }
         .theme-btn:active { transform: scale(0.9); }
+        .settings-btn { margin-left: 8px; }
 
         .app-body { padding: 0 20px 25px 20px; }
         
@@ -272,6 +274,78 @@
         }
         .hist-name { font-weight: 600; font-size: 14px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
         .hist-barcode { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+        /* --- Khu vực Cập nhật Database từ file Excel --- */
+        .import-section {
+            padding: 16px;
+            border-radius: 18px;
+            background: var(--card-inner-bg);
+            border: 1px dashed var(--glass-border);
+        }
+        .import-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .import-header h3 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .import-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+        .btn-import {
+            background: linear-gradient(135deg, #6d5bd0 0%, #8b7ff0 100%);
+        }
+        .btn-import:disabled { opacity: 0.6; pointer-events: none; }
+        .import-progress {
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px;
+            border-radius: 12px;
+            display: none;
+        }
+        .import-progress.show { display: block; }
+        .import-progress.info { background: rgba(109, 91, 208, 0.15); color: #6d5bd0; }
+        .import-progress.success { background: rgba(0, 128, 98, 0.15); color: var(--7e-green); }
+        .import-progress.error { background: rgba(226, 35, 26, 0.15); color: var(--7e-red); }
+
+        /* --- Modal Cài đặt (ẩn nút cập nhật database khỏi màn hình chính) --- */
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 30, 40, 0.4);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .settings-overlay.open { display: flex; }
+        .settings-modal {
+            width: 100%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(190%);
+            -webkit-backdrop-filter: blur(25px) saturate(190%);
+            border-radius: 26px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            padding: 22px;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .settings-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .settings-modal-header h3 { font-size: 16px; font-weight: 700; color: var(--text-main); }
+        .settings-close {
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -283,6 +357,7 @@
             <h2>Kiểm tra barcode, thông tin sản phẩm</h2>
         </div>
         <button class="theme-btn" onclick="toggleTheme()" id="themeIcon">🌙</button>
+        <button class="theme-btn settings-btn" onclick="openSettings()" title="Cài đặt">⚙️</button>
     </div>
 
     <div class="app-body">
@@ -351,7 +426,7 @@
 </div>
 
 <script>
-    const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbzZKE1WtzqEvZuyZe97JHuyGoIxyalVjAPAwMrV_iEoRJLmLMXKJ2LOo3nUS2LbVF2_/exec"; 
+    const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyKbEKNSqlKTeH7Hfe9puH1XsSgfpC3_5IJiG2hBE3gUZTX5prW3vvKMoiagxgzyOVq/exec"; 
     
     let products = []; 
     let html5QrCode; 
@@ -472,7 +547,108 @@
         initTheme();
         renderHistory();
         loadDatabaseFromSheet();
+        document.getElementById('importFileInput').addEventListener('change', handleImportFile);
     };
+
+    // ---------- CẬP NHẬT DATABASE TỪ FILE EXCEL ----------
+    function normalizeKey_(k) {
+        return String(k || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    function pickField_(row, normMap, candidates) {
+        for (const c of candidates) {
+            const key = normMap[c];
+            if (key !== undefined && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
+                return String(row[key]).trim();
+            }
+        }
+        return "";
+    }
+
+    function showImportProgress(msg, type) {
+        const el = document.getElementById('importProgress');
+        el.innerText = msg;
+        el.className = 'import-progress show ' + (type || 'info');
+    }
+
+    function handleImportFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const btn = document.getElementById('btnImport');
+        btn.disabled = true;
+        showImportProgress("⏳ Đang đọc file Excel...", "info");
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const wb = XLSX.read(evt.target.result, { type: "array" });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const rawRows = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false });
+
+                if (!rawRows.length) {
+                    showImportProgress("❌ File không có dữ liệu.", "error");
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Chuẩn hoá tên cột để khớp linh hoạt dù tiêu đề hơi khác nhau
+                const normMap = {};
+                Object.keys(rawRows[0]).forEach(k => { normMap[normalizeKey_(k)] = k; });
+
+                const mapped = rawRows.map(row => ({
+                    productId: pickField_(row, normMap, ["productid", "id"]),
+                    barcode: pickField_(row, normMap, ["baseupc", "upc", "barcode"]),
+                    name: pickField_(row, normMap, ["shortname", "name", "productname"]),
+                    group: pickField_(row, normMap, ["group"]),
+                    category: pickField_(row, normMap, ["category"]),
+                    subCategory: pickField_(row, normMap, ["subcategory"])
+                })).filter(r => r.productId || r.barcode);
+
+                if (!mapped.length) {
+                    showImportProgress("❌ Không tìm thấy các cột cần thiết trong file (Product ID, Base Upc...).", "error");
+                    btn.disabled = false;
+                    return;
+                }
+
+                showImportProgress(`⏳ Đang cập nhật ${mapped.length} sản phẩm lên database...`, "info");
+                sendImport(mapped, btn);
+            } catch (err) {
+                console.error(err);
+                showImportProgress("❌ Lỗi đọc file Excel. Kiểm tra định dạng file.", "error");
+                btn.disabled = false;
+            }
+        };
+        reader.onerror = function() {
+            showImportProgress("❌ Không thể đọc file.", "error");
+            btn.disabled = false;
+        };
+        reader.readAsArrayBuffer(file);
+        e.target.value = ""; // cho phép chọn lại cùng 1 file lần sau
+    }
+
+    function sendImport(rows, btn) {
+        fetch(GOOGLE_SHEET_API, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "import", rows: rows })
+        })
+        .then(res => res.json())
+        .then(res => {
+            btn.disabled = false;
+            if (res && res.success) {
+                showImportProgress(`✅ Đã thêm mới ${res.added} · cập nhật ${res.updated} sản phẩm.`, "success");
+                loadDatabaseFromSheet();
+            } else {
+                showImportProgress("❌ " + ((res && res.error) || "Cập nhật thất bại."), "error");
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            console.error(err);
+            showImportProgress("❌ Lỗi kết nối máy chủ khi cập nhật.", "error");
+        });
+    }
 
     function searchProduct() {
         const barcodeVal = document.getElementById('barcodeInput').value.trim();
