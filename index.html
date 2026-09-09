@@ -425,6 +425,26 @@
     </div>
 </div>
 
+<!-- Modal Cài đặt: chứa nút cập nhật database, ẩn khỏi màn hình vận hành chính -->
+<div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-modal">
+        <div class="settings-modal-header">
+            <h3>⚙️ Cài đặt</h3>
+            <button class="settings-close" onclick="closeSettings()">✕</button>
+        </div>
+
+        <div class="import-section">
+            <div class="import-header">
+                <h3>Cập nhật Database</h3>
+            </div>
+            <div class="import-hint">Tải lên file Excel dữ liệu gốc (Group, Category, Sub Category, Product ID, Short Name, Base Upc) để tự động cập nhật database.</div>
+            <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none;">
+            <button class="btn btn-import" id="btnImport" onclick="document.getElementById('importFileInput').click()">📤 TẢI FILE EXCEL LÊN</button>
+            <div class="import-progress" id="importProgress"></div>
+        </div>
+    </div>
+</div>
+
 <script>
     const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyKbEKNSqlKTeH7Hfe9puH1XsSgfpC3_5IJiG2hBE3gUZTX5prW3vvKMoiagxgzyOVq/exec"; 
     
@@ -548,7 +568,17 @@
         renderHistory();
         loadDatabaseFromSheet();
         document.getElementById('importFileInput').addEventListener('change', handleImportFile);
+        document.getElementById('settingsOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeSettings();
+        });
     };
+
+    function openSettings() {
+        document.getElementById('settingsOverlay').classList.add('open');
+    }
+    function closeSettings() {
+        document.getElementById('settingsOverlay').classList.remove('open');
+    }
 
     // ---------- CẬP NHẬT DATABASE TỪ FILE EXCEL ----------
     function normalizeKey_(k) {
