@@ -712,7 +712,25 @@ function showProduct(p) {
 
   $("result").classList.add("show");
   saveToHistory(p);
-  setTimeout(() => $("result").scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  scrollToResult();
+}
+
+// Cuộn để đầu thẻ kết quả (tên + giá) nằm ngay dưới header dính.
+// Header sticky che mất phần đầu nếu dùng scrollIntoView thường, và bàn phím đóng
+// làm trang đổi chiều cao nên cần căn lại sau khi bàn phím thu xuống.
+function scrollToResult() {
+  const align = smooth => {
+    const el = $("result");
+    if (!el.classList.contains("show")) return;
+    const header = document.querySelector(".header");
+    const offset = (header ? header.offsetHeight : 0) + 10;
+    const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: smooth ? "smooth" : "auto" });
+  };
+  clearTimeout(scrollToResult._t1); clearTimeout(scrollToResult._t2);
+  scrollToResult._t1 = setTimeout(() => align(true), 80);
+  // Căn lại lần cuối sau khi bàn phím đã đóng xong và bố cục ổn định
+  scrollToResult._t2 = setTimeout(() => align(false), 450);
 }
 
 function clearData() {
